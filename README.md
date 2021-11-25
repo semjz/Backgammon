@@ -1,1 +1,1 @@
-# Backgammon
+A backgammon game.
