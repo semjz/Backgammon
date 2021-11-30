@@ -12,6 +12,8 @@ class Board:
     def __init__(self):
         self.width_shift = WIDTH - 750
         self.board_pieces_list = self.create_board_pieces_list()
+        self.White_pieces_in_mid = []
+        self.black_pieces_in_mid = []
         self.numbers_list = self.creat_numbers()
         self.triangle_cicle_center = self.get_triangle_cicle_center()
 
@@ -208,13 +210,20 @@ class Board:
     def draw(self, surface):
         self.draw_background(surface)
         self.draw_rectangles(surface)
+        
         for num in self.numbers_list:
             num.draw_number(surface)
         self.draw_triangle(surface)
+        
         for i in range(24):
             for piece in self.board_pieces_list[i]:
                 piece.draw_piece(surface)
-
+        
+        for piece in self.White_pieces_in_mid:
+            piece.draw_piece(surface)
+        
+        for piece in self.black_pieces_in_mid:
+            piece.draw_piece(surface)
 
     # maybe I can rework and clean this function
     def find_tri_number(self, x_mouse, y_mouse):

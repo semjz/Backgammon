@@ -31,10 +31,11 @@ def main():
                 pos = pygame.mouse.get_pos()
                 dest_tri = game.select(pos[0], pos[1])
                 if(game.move(current_tri, dest_tri, game.turn)):
-                    game.change_turn()
+                    pass
+                    # game.change_turn()
                 
         # set up the board
-        game.update_baord(WIN)
+        game.draw_baord(WIN)
         # print(board.board_pieces_list)
         pygame.display.update()
         
