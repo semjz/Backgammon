@@ -16,3 +16,4 @@ class Piece:
     
     def __str__(self):
         return f"Piece: (color = {self.color}, center = {self.center})"
+
