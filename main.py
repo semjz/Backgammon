@@ -25,12 +25,17 @@ def main():
                 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                current_tri = game.select(pos[0], pos[1])
+                x_mouse, y_mouse = pos[0], pos[1]
+                current_tri = game.select(x_mouse, y_mouse)
                 
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
-                dest_tri = game.select(pos[0], pos[1])
-                if(game.move(current_tri, dest_tri, game.turn)):
+                x_mouse, y_mouse = pos[0], pos[1]
+                dest_tri = game.select(x_mouse, y_mouse)
+                if dest_tri == 27 or dest_tri == 28:
+                    game.move_to_piece_holder(current_tri, dest_tri)
+                
+                elif game.move(current_tri, dest_tri, game.turn):
                     pass
                     # game.change_turn()
                 

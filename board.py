@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import Rect
 import pygame.gfxdraw
 from piece import Piece
 from number import Number
@@ -11,12 +12,17 @@ class Board:
 
     def __init__(self):
         self.width_shift = WIDTH - 750
-        self.board_pieces_list = self.create_board_pieces_list()
-        self.White_pieces_in_mid = []
+        self.black_pieces_list = []
+        self.white_pieces_list = []
+        self.white_pieces_in_mid = []
         self.black_pieces_in_mid = []
+        self.board_pieces_list = self.create_board_pieces_list()
         self.numbers_list = self.creat_numbers()
         self.triangle_cicle_center = self.get_triangle_cicle_center()
-
+        self.white_pieces_holder_list = []
+        self.black_pieces_holder_list = []
+        self.white_pieces_holder = Rect(0, 0, 0, 0)
+        self.black_pieces_holder = Rect(0, 0, 0, 0)
 
     @staticmethod
     def get_paddings(number):
@@ -71,6 +77,14 @@ class Board:
 
         # middle line
         pygame.draw.line(surface, BLACK, (WIDTH/2, 0),(WIDTH/2, HEIGHT))
+
+        # pieces holders
+        self.white_pieces_holder = Rect(self.shift_right(750), 50, 50, 180)
+        self.black_pieces_holder = Rect(self.shift_right(750), 420, 50, 180)
+        
+        pygame.draw.rect(surface, BROWN, self.white_pieces_holder)
+        pygame.draw.rect(surface, BROWN, self.black_pieces_holder)
+
 
     def creat_numbers(self):
         self.numbers_list = []
@@ -167,43 +181,55 @@ class Board:
 
     def create_board_pieces_list(self):
         
-        self.board_pieces_list = [[] for i in range(24)]
+        self.board_pieces_list = [[] for i in range(26)]
         
         # Set up white pieces
         # Line 1
         for i in range(2):
-            piece = Piece(WHITE, 25, (self.shift_right(675), 575 - i * 50))
+            piece = Piece(WHITE, 25, (self.shift_right(675), 575 - i * 50), 1)
+            self.white_pieces_list.append(piece)
             self.board_pieces_list[0].append(piece)
         # Line 12
         for i in range(5):
-            piece = Piece(WHITE, 25, (self.shift_right(75), 575 - i * 50))
+            piece = Piece(WHITE, 25, (self.shift_right(75), 575 - i * 50), 12)
+            self.white_pieces_list.append(piece)
             self.board_pieces_list[11].append(piece)
         # Line 17
         for i in range(3):
-            piece = Piece(WHITE, 25, (self.shift_right(275), 75 + i * 50))
+            piece = Piece(WHITE, 25, (self.shift_right(275), 75 + i * 50), 18)
+            self.white_pieces_list.append(piece)
             self.board_pieces_list[16].append(piece)
         # line 19
         for i in range(5):
-            piece = Piece(WHITE, 25, (self.shift_right(425), 75 + i * 50))
+            piece = Piece(WHITE, 25, (self.shift_right(425), 75 + i * 50), 20)
+            self.white_pieces_list.append(piece)
             self.board_pieces_list[18].append(piece)
 
         # Set up black pieces
+
         # line 6
         for i in range(5):
-            piece = Piece(BLACK, 25, (self.shift_right(425), 575 - i * 50))
+            piece = Piece(BLACK, 25, (self.shift_right(425), 575 - i * 50), 6)
+            self.black_pieces_list.append(piece)
             self.board_pieces_list[5].append(piece)
         # line 8
         for i in range(3):
-            piece = Piece(BLACK, 25, (self.shift_right(275), 575 - i * 50))
+            piece = Piece(BLACK, 25, (self.shift_right(275), 575 - i * 50), 8)
+            self.black_pieces_list.append(piece)
             self.board_pieces_list[7].append(piece)
         # line 13
         for i in range(5):
-            piece = Piece(BLACK, 25, (self.shift_right(75), 75 + i * 50))
+            piece = Piece(BLACK, 25, (self.shift_right(75), 75 + i * 50), 13)
+            self.black_pieces_list.append(piece)
             self.board_pieces_list[12].append(piece)
         # line 24
         for i in range(2):
-            piece = Piece(BLACK, 25, (self.shift_right(675), 75 + i * 50))
+            piece = Piece(BLACK, 25, (self.shift_right(675), 75 + i * 50), 25)
+            self.black_pieces_list.append(piece)
             self.board_pieces_list[23].append(piece)
+        
+        self.board_pieces_list[24] = self.white_pieces_in_mid
+        self.board_pieces_list[25] = self.black_pieces_in_mid
         
         return self.board_pieces_list
 
@@ -219,11 +245,18 @@ class Board:
             for piece in self.board_pieces_list[i]:
                 piece.draw_piece(surface)
         
-        for piece in self.White_pieces_in_mid:
+        for piece in self.white_pieces_in_mid:
             piece.draw_piece(surface)
         
         for piece in self.black_pieces_in_mid:
             piece.draw_piece(surface)
+
+        for i in range(len(self.white_pieces_holder_list)):
+            pygame.draw.rect(surface, WHITE, (self.shift_right(750), 50 + i * 12, 50, 10))
+
+        for i in range(len(self.black_pieces_holder_list)):
+            pygame.draw.rect(surface, BLACK, (self.shift_right(750), 590 - i * 12, 50, 10))
+            
 
     # maybe I can rework and clean this function
     def find_tri_number(self, x_mouse, y_mouse):
