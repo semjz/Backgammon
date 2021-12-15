@@ -12,17 +12,18 @@ class Board:
 
     def __init__(self):
         self.width_shift = WIDTH - 750
-        self.black_pieces_list = []
-        self.white_pieces_list = []
+        self.black_pieces = []
+        self.white_pieces = []
+        self.pieces = self.create_pieces_list()
         self.white_pieces_in_mid = []
         self.black_pieces_in_mid = []
-        self.board_pieces_list = self.create_board_pieces_list()
-        self.numbers_list = self.creat_numbers()
-        self.triangle_cicle_center = self.get_triangle_cicle_center()
         self.white_pieces_holder_list = []
         self.black_pieces_holder_list = []
         self.white_pieces_holder = Rect(0, 0, 0, 0)
         self.black_pieces_holder = Rect(0, 0, 0, 0)
+        self.numbers = self.creat_numbers()
+        self.triangle_first_circle_centers = self.get_triangle_first_circle_center()
+  
 
     @staticmethod
     def get_paddings(number):
@@ -32,32 +33,32 @@ class Board:
 
         return width_padding_from_left, height_padding
 
-    def shift_right(self, input):
-        return input + self.width_shift / 2
+    def shift_right(self, width):
+        return width + self.width_shift / 2
 
-    def triangle_is_not_empty(self, tri_number):
-        return len(self.board_pieces_list[tri_number - 1]) > 0
+    def triangle_is_not_empty(self, tri_num):
+        return len(self.pieces[tri_num - 1]) > 0
 
-    def triangle_is_not_full(self, tri_number):
-        return len(self.board_pieces_list[tri_number - 1]) < 5
+    def triangle_is_not_full(self, tri_num):
+        return len(self.pieces[tri_num - 1]) < 5
 
     # first circle center for each triangle
-    def get_triangle_cicle_center(self):
-        triangle_cicle_center = {}
+    def get_triangle_first_circle_center(self):
+        triangle_first_circle_centers = {}
         
         for i in range(1, 7):
-            triangle_cicle_center[i] = (self.shift_right(675 - 50 * (i - 1)), 575)    
+            triangle_first_circle_centers[i] = (self.shift_right(675 - 50 * (i - 1)), 575)    
         
         for i in range(7, 13):
-            triangle_cicle_center[i] = (self.shift_right(325 - 50 * (i - 7)), 575)
+            triangle_first_circle_centers[i] = (self.shift_right(325 - 50 * (i - 7)), 575)
         
         for i in range (13, 19):
-            triangle_cicle_center[i] = (self.shift_right(75 + 50 * (i - 13)), 75)
+            triangle_first_circle_centers[i] = (self.shift_right(75 + 50 * (i - 13)), 75)
         
         for i in range (19, 25):
-            triangle_cicle_center[i] = (self.shift_right(425 + 50 * (i - 19)), 75)
+            triangle_first_circle_centers[i] = (self.shift_right(425 + 50 * (i - 19)), 75)
              
-        return triangle_cicle_center     
+        return triangle_first_circle_centers     
            
     def draw_background(self, surface):
         surface.fill(BACKGROUND_COLOR)
@@ -87,7 +88,7 @@ class Board:
 
 
     def creat_numbers(self):
-        self.numbers_list = []
+        self.numbers = []
 
         # bottom row numbers
         for i in range(1, 7):
@@ -96,7 +97,7 @@ class Board:
             x_number, y_number = self.shift_right(650 + width_padding_from_left 
                                                   - 50 * (i - 1)) , 600 + height_padding
             number.set_cords(x_number, y_number)          
-            self.numbers_list.append(number)
+            self.numbers.append(number)
     
         
         for i in range(7, 13):
@@ -105,7 +106,7 @@ class Board:
             x_number, y_number = self.shift_right(300 + width_padding_from_left 
                                                   - 50 * (i - 7)), 600 + height_padding
             number.set_cords(x_number, y_number)  
-            self.numbers_list.append(number)
+            self.numbers.append(number)
 
         
         # top row numbers
@@ -115,7 +116,7 @@ class Board:
             x_number, y_number = self.shift_right(50 + width_padding_from_left 
                                                   + 50 * (i - 13)), height_padding
             number.set_cords(x_number, y_number)
-            self.numbers_list.append(number)
+            self.numbers.append(number)
 
         
         for i in range(19, 25):
@@ -124,9 +125,9 @@ class Board:
             x_number, y_number = self.shift_right(400 + width_padding_from_left 
                                                   + 50 * (i - 19)), height_padding
             number.set_cords(x_number, y_number)
-            self.numbers_list.append(number)   
+            self.numbers.append(number)   
 
-        return self.numbers_list
+        return self.numbers
 
     def draw_triangle(self, surface):
         for i in range(1,7):
@@ -179,70 +180,67 @@ class Board:
           
             pygame.gfxdraw.filled_polygon(surface, right_side_up_triangles, color)
 
-    def create_board_pieces_list(self):
+    def create_pieces_list(self):
         
-        self.board_pieces_list = [[] for i in range(26)]
+        pieces = [[] for i in range(26)]
         
         # Set up white pieces
         # Line 1
         for i in range(2):
             piece = Piece(WHITE, 25, (self.shift_right(675), 575 - i * 50), 1)
-            self.white_pieces_list.append(piece)
-            self.board_pieces_list[0].append(piece)
+            self.white_pieces.append(piece)
+            pieces[0].append(piece)
         # Line 12
         for i in range(5):
             piece = Piece(WHITE, 25, (self.shift_right(75), 575 - i * 50), 12)
-            self.white_pieces_list.append(piece)
-            self.board_pieces_list[11].append(piece)
+            self.white_pieces.append(piece)
+            pieces[11].append(piece)
         # Line 17
         for i in range(3):
             piece = Piece(WHITE, 25, (self.shift_right(275), 75 + i * 50), 18)
-            self.white_pieces_list.append(piece)
-            self.board_pieces_list[16].append(piece)
+            self.white_pieces.append(piece)
+            pieces[16].append(piece)
         # line 19
         for i in range(5):
             piece = Piece(WHITE, 25, (self.shift_right(425), 75 + i * 50), 20)
-            self.white_pieces_list.append(piece)
-            self.board_pieces_list[18].append(piece)
+            self.white_pieces.append(piece)
+            pieces[18].append(piece)
 
         # Set up black pieces
 
         # line 6
         for i in range(5):
             piece = Piece(BLACK, 25, (self.shift_right(425), 575 - i * 50), 6)
-            self.black_pieces_list.append(piece)
-            self.board_pieces_list[5].append(piece)
+            self.black_pieces.append(piece)
+            pieces[5].append(piece)
         # line 8
         for i in range(3):
             piece = Piece(BLACK, 25, (self.shift_right(275), 575 - i * 50), 8)
-            self.black_pieces_list.append(piece)
-            self.board_pieces_list[7].append(piece)
+            self.black_pieces.append(piece)
+            pieces[7].append(piece)
         # line 13
         for i in range(5):
             piece = Piece(BLACK, 25, (self.shift_right(75), 75 + i * 50), 13)
-            self.black_pieces_list.append(piece)
-            self.board_pieces_list[12].append(piece)
+            self.black_pieces.append(piece)
+            pieces[12].append(piece)
         # line 24
         for i in range(2):
             piece = Piece(BLACK, 25, (self.shift_right(675), 75 + i * 50), 25)
-            self.black_pieces_list.append(piece)
-            self.board_pieces_list[23].append(piece)
+            self.black_pieces.append(piece)
+            pieces[23].append(piece)
         
-        self.board_pieces_list[24] = self.white_pieces_in_mid
-        self.board_pieces_list[25] = self.black_pieces_in_mid
-        
-        return self.board_pieces_list
+        return pieces
 
-    def draw(self, surface):
+    def draw_board(self, surface):
         self.draw_background(surface)
         self.draw_rectangles(surface)
         
-        for num in self.numbers_list:
+        for num in self.numbers:
             num.draw_number(surface)
         self.draw_triangle(surface)
         
         for i in range(24):
-            for piece in self.board_pieces_list[i]:
+            for piece in self.pieces[i]:
                 piece.draw_piece(surface)
         
         for piece in self.white_pieces_in_mid:
@@ -260,13 +258,7 @@ class Board:
 
     # maybe I can rework and clean this function
     def find_tri_number(self, x_mouse, y_mouse):
-        for num in self.numbers_list:
-            if(num.mouse_and_number_collision_is_detected(x_mouse, y_mouse)):
+        for num in self.numbers:
+            if(num.mouse_and_number_collision(x_mouse, y_mouse)):
                 return num.value
         return None
-
-    def __str__(self):
-        pieces = []
-        for piece in self.board_pieces_list:
-            pieces.append(piece.__str__())
-        return f"pieces_list:{pieces}"

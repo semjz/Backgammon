@@ -1,13 +1,12 @@
 import pygame
 
 
-class Piece:
-    pygame.init()    
+class Piece:   
     def __init__(self, color, radius, center, number):
         self.color = color
         self.radius = radius
         self.center = center
-        self.tri_number = number
+        self.tri_numb = number
     
     def draw_piece(self, surface):
         pygame.draw.circle(surface, self.color, self.center, self.radius)        
@@ -16,8 +15,6 @@ class Piece:
         self.center = (x, y)
 
     def set_tri_number(self, number):
-        self.tri_number = number
+        self.tri_numb = number
     
-    def __str__(self):
-        return f"Piece: (color = {self.color}, center = {self.center})"
 

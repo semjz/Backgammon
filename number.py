@@ -12,12 +12,9 @@ class Number:
         self.height = self.rendered_number.get_height()
         self.x_cord = 0
         self.y_cord = 0
-        
-    def __str__(self):
-        return f"value: {self.value}, self.x_cord: {self.x_cord}, self.y_cord: {self.y_cord}"
 
     
-    def mouse_and_number_collision_is_detected(self, x_mouse, y_mouse):
+    def mouse_and_number_collision(self, x_mouse, y_mouse):
         if self.width < 10:
             return (self.x_cord - 5 < x_mouse < self.x_cord + self.width + 5) and (self.y_cord < y_mouse < self.y_cord + self.height)
         else:
