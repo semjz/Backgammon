@@ -1,6 +1,5 @@
 from board import Board
 from constants import *
-import time
 
 class Game:
     
@@ -31,7 +30,6 @@ class Game:
                     + len(self.board.pieces[dest_tri_num - 1]) * 50
         
         piece.set_center(des_x, dest_y)
-        print(dest_tri_num)
         piece.set_tri_num(dest_tri_num)
         self.board.pieces[dest_tri_num - 1].append(piece)
     
@@ -130,14 +128,12 @@ class Game:
         if current_tri_num is not None: 
             if self.legal_move_to_holders(current_tri_num, place_holder):
                 piece = self.board.pieces[current_tri_num - 1].pop()
-                print("legal move")
                 
                 if place_holder == "white place holder":
                     self.board.white_pieces_holder_list.append(piece)
                 
                 elif place_holder == "black place holder":
                     self.board.black_pieces_holder_list.append(piece)
-                    print(self.board.black_pieces_holder_list)
 
 
     def legal_move_to_holders(self, current_tri_num, place_holder):
@@ -161,8 +157,6 @@ class Game:
                 if place_holder == "white place holder":
                     return False
                 for piece in self.board.black_pieces:
-                    time.sleep(0.1)
-                    print(piece.tri_num)
                     if piece.tri_num > 6:
                         return False
                     # remove the piece from black pieces because the moves is valid.
