@@ -1,6 +1,5 @@
 import pygame
 from game import Game
-from board import Board
 from constants import *
 
 
@@ -37,11 +36,12 @@ def main():
                 if current_tri == "white mid bar" or current_tri == "black mid bar":
                     game.move_from_mid_bar_to_board(current_tri, dest_tri)
                     
-                if dest_tri == "white place holder" or dest_tri == "black place holder":
+                elif dest_tri == "white place holder" or dest_tri == "black place holder":
                     game.move_to_piece_holder(current_tri, dest_tri)
-
-                game.move_on_board(current_tri, dest_tri)
                 
+                else:
+                    game.move_on_board(current_tri, dest_tri)
+
         # set up the board
         game.draw_board(WIN)
         # print(board.board_pieces_list)

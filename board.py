@@ -4,7 +4,6 @@ import pygame.gfxdraw
 from piece import Piece
 from number import Number
 from constants import *
-import time
 
 
 class Board:
