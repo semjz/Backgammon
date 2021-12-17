@@ -1,6 +1,6 @@
 import pygame
-from pygame.locals import Rect
 import pygame.gfxdraw
+from pygame.locals import Rect
 from piece import Piece
 from number import Number
 from constants import *
@@ -21,16 +21,24 @@ class Board:
         self.white_pieces_holder = Rect(0, 0, 0, 0)
         self.black_pieces_holder = Rect(0, 0, 0, 0)
         self.numbers = self.creat_numbers()
-        self.triangle_first_circle_centers = self.get_triangle_first_circle_center()
+        self.triangle_first_circle_centers = self.get_triangle_first_circle_centers()
   
 
     @staticmethod
-    def get_paddings(number):
+    def calc_num_paddings(number):
         
-        width_padding_from_left = (50 - number.width) / 2
+        width_padding = (50 - number.width) / 2
         height_padding = (50 - number.height) / 2 
 
-        return width_padding_from_left, height_padding
+        return width_padding, height_padding
+    
+    
+    def add_num_paddings(self, number, x, y):
+        width_padding, height_padding = Board.calc_num_paddings(number)
+        new_x = self.shift_right(x + width_padding)
+        new_y = y + height_padding
+        return new_x, new_y
+
 
     def shift_right(self, width):
         return width + self.width_shift / 2
@@ -42,7 +50,7 @@ class Board:
         return len(self.pieces[tri_num - 1]) < 5
 
     # first circle center for each triangle
-    def get_triangle_first_circle_center(self):
+    def get_triangle_first_circle_centers(self):
         triangle_first_circle_centers = {}
         
         for i in range(1, 7):
@@ -63,7 +71,6 @@ class Board:
         surface.fill(BACKGROUND_COLOR)
 
     def draw_rectangles(self, surface):
-        self.draw_background(surface)
         # left border
         pygame.draw.rect(surface, GRAY, (0, 0, self.shift_right(50), HEIGHT))
         # right border
@@ -82,6 +89,7 @@ class Board:
         self.white_pieces_holder = Rect(self.shift_right(750), 50, 50, 180)
         self.black_pieces_holder = Rect(self.shift_right(750), 420, 50, 180)
         
+        # draw pieces holders
         pygame.draw.rect(surface, BROWN, self.white_pieces_holder)
         pygame.draw.rect(surface, BROWN, self.black_pieces_holder)
 
@@ -89,71 +97,66 @@ class Board:
     def creat_numbers(self):
         self.numbers = []
 
-        # bottom row numbers
+        # bottom numbers
         for i in range(1, 7):
             number = Number(i)
-            width_padding_from_left, height_padding = self.get_paddings(number)
-            x_number, y_number = self.shift_right(650 + width_padding_from_left 
-                                                  - 50 * (i - 1)) , 600 + height_padding
+            x_number, y_number = self.add_num_paddings(number, 650 - 50 * (i - 1) , 600) 
             number.set_cords(x_number, y_number)          
             self.numbers.append(number)
     
         
         for i in range(7, 13):
             number = Number(i)
-            width_padding_from_left, height_padding = self.get_paddings(number)
-            x_number, y_number = self.shift_right(300 + width_padding_from_left 
-                                                  - 50 * (i - 7)), 600 + height_padding
+            x_number, y_number = self.add_num_paddings(number, 300 - 50 * (i - 7), 600)
             number.set_cords(x_number, y_number)  
             self.numbers.append(number)
 
         
-        # top row numbers
+        # top numbers
         for i in range(13, 19):
             number = Number(i)
-            width_padding_from_left, height_padding = self.get_paddings(number)
-            x_number, y_number = self.shift_right(50 + width_padding_from_left 
-                                                  + 50 * (i - 13)), height_padding
+            x_number, y_number = self.add_num_paddings(number, 50 + 50 * (i - 13), 0)
             number.set_cords(x_number, y_number)
             self.numbers.append(number)
 
         
         for i in range(19, 25):
             number = Number(i)
-            width_padding_from_left, height_padding = self.get_paddings(number)
-            x_number, y_number = self.shift_right(400 + width_padding_from_left 
-                                                  + 50 * (i - 19)), height_padding
+            x_number, y_number = self.add_num_paddings(number, 400 + 50 * (i - 19), 0)
             number.set_cords(x_number, y_number)
             self.numbers.append(number)   
 
         return self.numbers
 
     def draw_triangle(self, surface):
+        # down triangles
         for i in range(1,7):
             if i % 2 == 0:
                 color = TAN
             else:
                 color = DARK_ORANGE3
             
-            left_side_down_triangles = [(self.shift_right(i*50) , 600)
+            # left side triangle to be drawn
+            left_side_down_triangle = [(self.shift_right(i*50) , 600)
                                         , (self.shift_right((i+1)*50) , 600)
                                         , (self.shift_right(75 + (i-1)*50), 350)]
             
-            right_side_down_triangles = [(self.shift_right((i+7)*50), 600)
+            # right side triangle to be drawn
+            right_side_down_triangle = [(self.shift_right((i+7)*50), 600)
                                          , (self.shift_right((i+8)*50), 600)
                                          , (self.shift_right(425 + (i-1)*50), 350)]
             
-            # down triangles
-            pygame.gfxdraw.aapolygon(surface, left_side_down_triangles, color)
+            # draw an anti aliasing polygan
+            pygame.gfxdraw.aapolygon(surface, left_side_down_triangle, color)
           
-            pygame.gfxdraw.aapolygon(surface, right_side_down_triangles, color)
+            pygame.gfxdraw.aapolygon(surface, right_side_down_triangle, color)
 
-            # filled dwn triangles
-            pygame.gfxdraw.filled_polygon(surface, left_side_down_triangles, color)
+            # draw a filled polygan
+            pygame.gfxdraw.filled_polygon(surface, left_side_down_triangle, color)
           
-            pygame.gfxdraw.filled_polygon(surface, right_side_down_triangles, color)
+            pygame.gfxdraw.filled_polygon(surface, right_side_down_triangle, color)
             
-
+        # top triangles
         for i in range(6,0,-1):
 
             if i % 2 == 0:
@@ -161,27 +164,29 @@ class Board:
             else:
                 color = TAN
 
-            left_side_up_triangles = [(self.shift_right(i*50), 50)
+            # left side triangle to be drawn
+            left_side_up_triangle = [(self.shift_right(i*50), 50)
                                       , (self.shift_right((i+1)*50), 50)
                                       , (self.shift_right(75 + (i-1)*50), 300)]
             
-            right_side_up_triangles = [(self.shift_right((i+7)*50), 50)
+            # right side triangle to be drawn
+            right_side_up_triangle = [(self.shift_right((i+7)*50), 50)
                                         , (self.shift_right((i+8)*50), 50)
                                         , (self.shift_right(425 + (i-1)*50), 300)]
                 
-            # top triangles
-            pygame.gfxdraw.aapolygon(surface, left_side_up_triangles, color)
+            # draw an anti aliasing polygan
+            pygame.gfxdraw.aapolygon(surface, left_side_up_triangle, color)
           
-            pygame.gfxdraw.aapolygon(surface, right_side_up_triangles, color)
+            pygame.gfxdraw.aapolygon(surface, right_side_up_triangle, color)
 
-            # filled top triangles
-            pygame.gfxdraw.filled_polygon(surface, left_side_up_triangles, color)
+            # draw a filled polygan
+            pygame.gfxdraw.filled_polygon(surface, left_side_up_triangle, color)
           
-            pygame.gfxdraw.filled_polygon(surface, right_side_up_triangles, color)
+            pygame.gfxdraw.filled_polygon(surface, right_side_up_triangle, color)
 
     def create_pieces_list(self):
         
-        pieces = [[] for i in range(26)]
+        pieces = [[] for i in range(24)]
         
         # Set up white pieces
         # Line 1
@@ -206,7 +211,6 @@ class Board:
             pieces[18].append(piece)
 
         # Set up black pieces
-
         # line 6
         for i in range(5):
             piece = Piece(BLACK, 25, (self.shift_right(425), 575 - i * 50), 6)
@@ -231,11 +235,13 @@ class Board:
         return pieces
 
     def draw_board(self, surface):
+        
         self.draw_background(surface)
         self.draw_rectangles(surface)
         
         for num in self.numbers:
             num.draw_number(surface)
+        
         self.draw_triangle(surface)
         
         for i in range(24):
@@ -255,7 +261,7 @@ class Board:
             pygame.draw.rect(surface, BLACK, (self.shift_right(750), 590 - i * 12, 50, 10))
             
 
-    # maybe I can rework and clean this function
+    # find the triangle number that mouse cursor is on.
     def find_tri_number(self, x_mouse, y_mouse):
         for num in self.numbers:
             if(num.mouse_and_number_collision(x_mouse, y_mouse)):

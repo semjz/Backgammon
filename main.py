@@ -9,7 +9,6 @@ pygame.display.set_caption("Backgammon")
 
 
 def main():
-    pygame.init()
     running = True
     clock = pygame.time.Clock()
     
@@ -25,13 +24,13 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 x_mouse, y_mouse = pos[0], pos[1]
-                current_tri = game.select(x_mouse, y_mouse)
+                current_tri = game.locate(x_mouse, y_mouse)
                 
                 
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 x_mouse, y_mouse = pos[0], pos[1]
-                dest_tri = game.select(x_mouse, y_mouse)
+                dest_tri = game.locate(x_mouse, y_mouse)
                 
                 if current_tri == "white mid bar" or current_tri == "black mid bar":
                     game.move_from_mid_bar_to_board(current_tri, dest_tri)
@@ -44,7 +43,6 @@ def main():
 
         # set up the board
         game.draw_board(WIN)
-        # print(board.board_pieces_list)
         pygame.display.update()
         
     pygame.quit()

@@ -2,6 +2,7 @@ import pygame
 from constants import *
 
 class Number:
+    # to use the font init() is used.
     pygame.init()
     font = pygame.font.SysFont("Arial", 15)
     
