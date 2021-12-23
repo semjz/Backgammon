@@ -14,19 +14,19 @@ class Game:
     def locate(self, x, y):
         if self.board.shift_right(350) < x <self.board.shift_right(400) and y < 50:
             self.board.area_selected = True
-            return "black mid bar" 
+            return BLACK_MID_BAR
         elif self.board.shift_right(350) < x <self.board.shift_right(400) and y > 600:
             self.board.area_selected  = True
-            return "white mid bar"
+            return WHITE_MID_BAR
 
         if self.board.white_pieces_holder.collidepoint(x, y):
             if self.board.area_selected:
-                return "white place holder"
+                return WHITE_PLACE_HOLDER
             else:
                 return None
         elif self.board.black_pieces_holder.collidepoint(x, y):
             if self.board.area_selected:
-                return "black place holder"
+                return BLACK_PLACE_HOLDER
             else:
                 return None
         return self.board.find_tri_number(x, y)
@@ -51,7 +51,7 @@ class Game:
             if self.legal_move_from_mid_bar_to_board(mid_bar, dest_tri_num):
                 dest_tri_pieces_list = self.board.pieces[dest_tri_num - 1]
          
-                if mid_bar == "white mid bar":
+                if mid_bar == WHITE_MID_BAR:
                     # if the destination triangle only has 1 piece
                     if len(dest_tri_pieces_list) == 1:
                         current_tri_pieces_list = self.board.white_pieces_in_mid
@@ -66,7 +66,7 @@ class Game:
                     piece = self.board.white_pieces_in_mid.pop()
                     self.place_piece_at_destination(piece, dest_tri_num)
 
-                if mid_bar == "black mid bar":
+                if mid_bar == BLACK_MID_BAR:
                     # if the destination triangle only has 1 piece
                     if len(dest_tri_pieces_list) == 1:
                         current_tri_pieces_list = self.board.black_pieces_in_mid
@@ -84,13 +84,13 @@ class Game:
 
     def legal_move_from_mid_bar_to_board(self, mid_bar, dest_tri_num):
         
-        if dest_tri_num == "white place holder" or dest_tri_num == "black place holder":
+        if dest_tri_num == WHITE_PLACE_HOLDER or dest_tri_num == BLACK_PLACE_HOLDER:
             return False
 
-        if mid_bar == "white mid bar":
+        if mid_bar == WHITE_MID_BAR:
             current_pieces_list = self.board.white_pieces_in_mid
         
-        if mid_bar == "black mid bar":
+        if mid_bar == BLACK_MID_BAR:
             current_pieces_list = self.board.black_pieces_in_mid
         
         if len(current_pieces_list) > 0 and self.board.triangle_is_not_full(dest_tri_num):
@@ -138,10 +138,10 @@ class Game:
         if current_tri_num == dest_tri_num:
             return False
 
-        if dest_tri_num == "white mid bar" or  dest_tri_num == "black mid bar":
+        if dest_tri_num == WHITE_MID_BAR or  dest_tri_num == BLACK_MID_BAR:
             return False
 
-        if current_tri_num == "white place holder" or  current_tri_num == "black place holder":
+        if current_tri_num == WHITE_PLACE_HOLDER or  current_tri_num == BLACK_PLACE_HOLDER:
             return False
 
         if self.board.triangle_is_not_empty(current_tri_num) and self.board.triangle_is_not_full(dest_tri_num): 
@@ -167,17 +167,17 @@ class Game:
             if self.legal_move_to_holders(current_tri_num, place_holder):
                 piece = self.board.pieces[current_tri_num - 1].pop()
                 
-                if place_holder == "white place holder":
+                if place_holder == WHITE_PLACE_HOLDER:
                     self.board.white_pieces.pop()
                     self.board.white_pieces_holder_list.append(piece)
                 
-                elif place_holder == "black place holder":
+                elif place_holder == BLACK_PLACE_HOLDER:
                     self.board.black_pieces.pop()
                     self.board.black_pieces_holder_list.append(piece)
 
 
     def legal_move_to_holders(self, current_tri_num, place_holder):
-        if current_tri_num == "white place holder" or current_tri_num == "black place holder":
+        if current_tri_num == WHITE_PLACE_HOLDER or current_tri_num == BLACK_PLACE_HOLDER:
             return False
 
         if self.board.triangle_is_not_empty(current_tri_num):
@@ -185,7 +185,7 @@ class Game:
             current_piece = current_tri_pieces_list[-1]
             
             if current_piece.color == WHITE:
-                if place_holder == "black place holder":
+                if place_holder == BLACK_PLACE_HOLDER:
                     return False
                 for piece in self.board.white_pieces:
                     # if a piece is not at home base.
@@ -194,7 +194,7 @@ class Game:
                 return True
             
             elif current_piece.color == BLACK:
-                if place_holder == "white place holder":
+                if place_holder == WHITE_PLACE_HOLDER:
                     return False
                 for piece in self.board.black_pieces:
                     # if a piece is not at home base.
@@ -205,10 +205,10 @@ class Game:
             return False
 
     def move(self):
-        if self.current_area == "white mid bar" or self.current_area == "black mid bar":
+        if self.current_area == WHITE_MID_BAR or self.current_area == BLACK_MID_BAR:
             self.move_from_mid_bar_to_board(self.current_area, self.dest_area)
             
-        elif self.dest_area == "white place holder" or self.dest_area == "black place holder":
+        elif self.dest_area == WHITE_PLACE_HOLDER or self.dest_area == BLACK_PLACE_HOLDER:
             self.move_to_piece_holder(self.current_area, self.dest_area)
         
         else:
@@ -231,11 +231,11 @@ class Game:
             self.board.black_pieces_in_mid.append(piece)
 
     def check_current_area_has_piece(self):
-        if self.current_area == "white mid bar":
+        if self.current_area == WHITE_MID_BAR:
             if not self.board.white_pieces_in_mid:
                 self.board.area_selected = False
         
-        elif self.current_area == "black mid bar":
+        elif self.current_area == BLACK_MID_BAR:
             if not self.board.black_pieces_in_mid:
                 self.board.area_selected = False
         
