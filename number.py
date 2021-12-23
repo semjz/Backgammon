@@ -15,7 +15,7 @@ class Number:
         self.y_cord = 0
 
     
-    def mouse_and_number_collision(self, x_mouse, y_mouse):
+    def collides_with_mouse(self, x_mouse, y_mouse):
         if self.width < 10:
             return (self.x_cord - 5 < x_mouse < self.x_cord + self.width + 5) and (self.y_cord < y_mouse < self.y_cord + self.height)
         else:

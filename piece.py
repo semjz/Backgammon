@@ -16,5 +16,6 @@ class Piece:
 
     def set_tri_num(self, number):
         self.tri_num = number
+
     
 

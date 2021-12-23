@@ -22,6 +22,7 @@ class Board:
         self.black_pieces_holder = Rect(0, 0, 0, 0)
         self.numbers = self.creat_numbers()
         self.triangle_first_circle_centers = self.get_triangle_first_circle_centers()
+        self.area_selected = False
   
 
     @staticmethod
@@ -44,7 +45,7 @@ class Board:
         return width + self.width_shift / 2
 
     def triangle_is_not_empty(self, tri_num):
-        return len(self.pieces[tri_num - 1]) > 0
+        return len(self.pieces[tri_num - 1])
 
     def triangle_is_not_full(self, tri_num):
         return len(self.pieces[tri_num - 1]) < 5
@@ -264,6 +265,7 @@ class Board:
     # find the triangle number that mouse cursor is on.
     def find_tri_number(self, x_mouse, y_mouse):
         for num in self.numbers:
-            if(num.mouse_and_number_collision(x_mouse, y_mouse)):
+            if(num.collides_with_mouse(x_mouse, y_mouse)):
+                self.area_selected = True
                 return num.value
         return None

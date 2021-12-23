@@ -1,3 +1,4 @@
+import pygame
 from board import Board
 from constants import *
 
@@ -5,19 +6,29 @@ class Game:
     
     def __init__(self):
         self.board = Board()
+        self.current_area = None
+        self.dest_area = None
+        
 
     # locate the area of board. 
     def locate(self, x, y):
         if self.board.shift_right(350) < x <self.board.shift_right(400) and y < 50:
+            self.board.area_selected = True
             return "black mid bar" 
         elif self.board.shift_right(350) < x <self.board.shift_right(400) and y > 600:
+            self.board.area_selected  = True
             return "white mid bar"
- 
-        if self.board.white_pieces_holder.collidepoint(x,y):
-            return "white place holder"
-        elif self.board.black_pieces_holder.collidepoint(x,y):
-            return "black place holder"
 
+        if self.board.white_pieces_holder.collidepoint(x, y):
+            if self.board.area_selected:
+                return "white place holder"
+            else:
+                return None
+        elif self.board.black_pieces_holder.collidepoint(x, y):
+            if self.board.area_selected:
+                return "black place holder"
+            else:
+                return None
         return self.board.find_tri_number(x, y)
 
     def place_piece_at_destination(self, piece, dest_tri_num):
@@ -72,6 +83,10 @@ class Game:
             
 
     def legal_move_from_mid_bar_to_board(self, mid_bar, dest_tri_num):
+        
+        if dest_tri_num == "white place holder" or dest_tri_num == "black place holder":
+            return False
+
         if mid_bar == "white mid bar":
             current_pieces_list = self.board.white_pieces_in_mid
         
@@ -120,6 +135,9 @@ class Game:
                 
     
     def legel_move_on_board(self, current_tri_num, dest_tri_num):
+        if current_tri_num == dest_tri_num:
+            return False
+
         if dest_tri_num == "white mid bar" or  dest_tri_num == "black mid bar":
             return False
 
@@ -186,6 +204,17 @@ class Game:
         else:
             return False
 
+    def move(self):
+        if self.current_area == "white mid bar" or self.current_area == "black mid bar":
+            self.move_from_mid_bar_to_board(self.current_area, self.dest_area)
+            
+        elif self.dest_area == "white place holder" or self.dest_area == "black place holder":
+            self.move_to_piece_holder(self.current_area, self.dest_area)
+        
+        else:
+            self.move_on_board(self.current_area, self.dest_area)
+        self.board.area_selected = False
+
     def remove_piece_from_board_to_mid_bar(self, tri_num):
         piece = self.board.pieces[tri_num - 1].pop()
         
@@ -201,6 +230,19 @@ class Game:
             piece.set_center(x, y)
             self.board.black_pieces_in_mid.append(piece)
 
+    def check_current_area_has_piece(self):
+        if self.current_area == "white mid bar":
+            if not self.board.white_pieces_in_mid:
+                self.board.area_selected = False
+        
+        elif self.current_area == "black mid bar":
+            if not self.board.black_pieces_in_mid:
+                self.board.area_selected = False
+        
+        elif self.current_area != None:
+            if not self.board.triangle_is_not_empty(self.current_area):
+                self.board.area_selected = False
 
-    def draw_board(self, surface):
+    def update(self, surface):
         self.board.draw_board(surface)
+        pygame.display.update()
