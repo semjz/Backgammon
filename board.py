@@ -22,7 +22,6 @@ class Board:
         self.black_pieces_holder = Rect(0, 0, 0, 0)
         self.numbers = self.creat_numbers()
         self.triangle_first_piece_centers = self.get_triangle_first_piece_centers()
-        self.area_selected = False
   
     """To adjust a number to be drawn in the middle of the square we calculate
        paddings that should be added to the cords of top left corner of 
@@ -278,18 +277,4 @@ class Board:
             pygame.draw.rect(surface, BLACK, (self.shift_right(750), 590 - i * 12, 50, 10))
             
 
-    # Find the triangle number that mouse cursor is on.
-    def find_tri_number(self, x_mouse, y_mouse):
-        for num in self.numbers:
-            if num.collides_with_mouse(x_mouse, y_mouse):
-                """Only highlight the last piece on triangle if the triangle is
-                   selected to start a move (as the origin of move) and the triangle
-                   actually has piece."""
-                if not self.area_selected and self.triangle_is_not_empty(num.value):
-                    # Last piece on the triangle 
-                    piece = self.pieces[num.value - 1][-1]
-                    piece.highlight()
-                # Since the mouse clicked on number an area is already selected.
-                self.area_selected = True
-                return num.value
-        return None
+

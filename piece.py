@@ -11,6 +11,7 @@ class Piece:
         self.center = center
         self.tri_num = number
     
+    # if piece is higlighted draw a yellow piece otherwise white.
     def draw_piece(self, surface):
         if self.highlighted:
             pygame.draw.circle(surface, self.highlighted_color, self.center, self.radius) 
