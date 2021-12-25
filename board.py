@@ -21,52 +21,58 @@ class Board:
         self.white_pieces_holder = Rect(0, 0, 0, 0)
         self.black_pieces_holder = Rect(0, 0, 0, 0)
         self.numbers = self.creat_numbers()
-        self.triangle_first_circle_centers = self.get_triangle_first_circle_centers()
+        self.triangle_first_piece_centers = self.get_triangle_first_piece_centers()
         self.area_selected = False
   
-
+    """To adjust a number to be drawn in the middle of the square we calculate
+       paddings that should be added to the cords of top left corner of 
+       the square that the number is drawn in."""
     @staticmethod
     def calc_num_paddings(number):
         
-        width_padding = (50 - number.width) / 2
-        height_padding = (50 - number.height) / 2 
+        sqaure_size = 50 
+        width_padding = (sqaure_size - number.width) / 2
+        height_padding = (sqaure_size - number.height) / 2 
 
         return width_padding, height_padding
     
-    
+    """Accept the cords of top left square and add paddins to it and
+       that should be the cords that the number is drawn at. The cords
+       would be the top left of point of the number"""
     def add_num_paddings(self, number, x, y):
         width_padding, height_padding = Board.calc_num_paddings(number)
         new_x = self.shift_right(x + width_padding)
         new_y = y + height_padding
         return new_x, new_y
 
-
+    """shift an object in the board to the right. the minimum width of
+       the board is 750 so if width is greater than that every object 
+       in the board is shifted too the right"""
     def shift_right(self, width):
         return width + self.width_shift / 2
 
     def triangle_is_not_empty(self, tri_num):
-        return len(self.pieces[tri_num - 1])
+        return self.pieces[tri_num - 1]
 
-    def triangle_is_not_full(self, tri_num):
-        return len(self.pieces[tri_num - 1]) < 5
-
-    # first circle center for each triangle
-    def get_triangle_first_circle_centers(self):
-        triangle_first_circle_centers = {}
+    # Get first circle center for each triangle
+    def get_triangle_first_piece_centers(self):
+        """key is the triangle number and value is the cords of where
+           first piece must be paced placed"""
+        triangle_first_piece_centers = {}
         
         for i in range(1, 7):
-            triangle_first_circle_centers[i] = (self.shift_right(675 - 50 * (i - 1)), 575)    
+            triangle_first_piece_centers[i] = (self.shift_right(675 - 50 * (i - 1)), 575)    
         
         for i in range(7, 13):
-            triangle_first_circle_centers[i] = (self.shift_right(325 - 50 * (i - 7)), 575)
+            triangle_first_piece_centers[i] = (self.shift_right(325 - 50 * (i - 7)), 575)
         
         for i in range (13, 19):
-            triangle_first_circle_centers[i] = (self.shift_right(75 + 50 * (i - 13)), 75)
+            triangle_first_piece_centers[i] = (self.shift_right(75 + 50 * (i - 13)), 75)
         
         for i in range (19, 25):
-            triangle_first_circle_centers[i] = (self.shift_right(425 + 50 * (i - 19)), 75)
+            triangle_first_piece_centers[i] = (self.shift_right(425 + 50 * (i - 19)), 75)
              
-        return triangle_first_circle_centers     
+        return triangle_first_piece_centers     
            
     def draw_background(self, surface):
         surface.fill(BACKGROUND_COLOR)
@@ -147,12 +153,13 @@ class Board:
                                          , (self.shift_right((i+8)*50), 600)
                                          , (self.shift_right(425 + (i-1)*50), 350)]
             
-            # draw an anti aliasing polygan
+            """Drawing anti aliased polygans first will reduce the pixelation"""
+            # draw anti aliased polygans
             pygame.gfxdraw.aapolygon(surface, left_side_down_triangle, color)
           
             pygame.gfxdraw.aapolygon(surface, right_side_down_triangle, color)
 
-            # draw a filled polygan
+            # draw filled polygans
             pygame.gfxdraw.filled_polygon(surface, left_side_down_triangle, color)
           
             pygame.gfxdraw.filled_polygon(surface, right_side_down_triangle, color)
@@ -174,13 +181,14 @@ class Board:
             right_side_up_triangle = [(self.shift_right((i+7)*50), 50)
                                         , (self.shift_right((i+8)*50), 50)
                                         , (self.shift_right(425 + (i-1)*50), 300)]
-                
-            # draw an anti aliasing polygan
+            
+            """Drawing anti aliased polygans first will reduce the pixelation"""
+            # draw anti aliased polygans
             pygame.gfxdraw.aapolygon(surface, left_side_up_triangle, color)
           
             pygame.gfxdraw.aapolygon(surface, right_side_up_triangle, color)
 
-            # draw a filled polygan
+            # draw filled polygans
             pygame.gfxdraw.filled_polygon(surface, left_side_up_triangle, color)
           
             pygame.gfxdraw.filled_polygon(surface, right_side_up_triangle, color)
@@ -189,47 +197,55 @@ class Board:
         
         pieces = [[] for i in range(24)]
         
-        # Set up white pieces
+        """White peices set up"""
         # Line 1
         for i in range(2):
             piece = Piece(WHITE, 25, (self.shift_right(675), 575 - i * 50), 1)
+            piece.set_tri_num(1)
             self.white_pieces.append(piece)
             pieces[0].append(piece)
         # Line 12
         for i in range(5):
             piece = Piece(WHITE, 25, (self.shift_right(75), 575 - i * 50), 12)
+            piece.set_tri_num(12)
             self.white_pieces.append(piece)
             pieces[11].append(piece)
         # Line 17
         for i in range(3):
             piece = Piece(WHITE, 25, (self.shift_right(275), 75 + i * 50), 18)
+            piece.set_tri_num(17)
             self.white_pieces.append(piece)
             pieces[16].append(piece)
         # line 19
         for i in range(5):
             piece = Piece(WHITE, 25, (self.shift_right(425), 75 + i * 50), 20)
+            piece.set_tri_num(19)
             self.white_pieces.append(piece)
             pieces[18].append(piece)
 
-        # Set up black pieces
+        """black peices set up"""
         # line 6
         for i in range(5):
             piece = Piece(BLACK, 25, (self.shift_right(425), 575 - i * 50), 6)
+            piece.set_tri_num(6)
             self.black_pieces.append(piece)
             pieces[5].append(piece)
         # line 8
         for i in range(3):
             piece = Piece(BLACK, 25, (self.shift_right(275), 575 - i * 50), 8)
+            piece.set_tri_num(8)
             self.black_pieces.append(piece)
             pieces[7].append(piece)
         # line 13
         for i in range(5):
             piece = Piece(BLACK, 25, (self.shift_right(75), 75 + i * 50), 13)
+            piece.set_tri_num(13)
             self.black_pieces.append(piece)
             pieces[12].append(piece)
         # line 24
         for i in range(2):
             piece = Piece(BLACK, 25, (self.shift_right(675), 75 + i * 50), 25)
+            piece.set_tri_num(24)
             self.black_pieces.append(piece)
             pieces[23].append(piece)
         
@@ -262,10 +278,18 @@ class Board:
             pygame.draw.rect(surface, BLACK, (self.shift_right(750), 590 - i * 12, 50, 10))
             
 
-    # find the triangle number that mouse cursor is on.
+    # Find the triangle number that mouse cursor is on.
     def find_tri_number(self, x_mouse, y_mouse):
         for num in self.numbers:
-            if(num.collides_with_mouse(x_mouse, y_mouse)):
+            if num.collides_with_mouse(x_mouse, y_mouse):
+                """Only highlight the last piece on triangle if the triangle is
+                   selected to start a move (as the origin of move) and the triangle
+                   actually has piece."""
+                if not self.area_selected and self.triangle_is_not_empty(num.value):
+                    # Last piece on the triangle 
+                    piece = self.pieces[num.value - 1][-1]
+                    piece.highlight()
+                # Since the mouse clicked on number an area is already selected.
                 self.area_selected = True
                 return num.value
         return None

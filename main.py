@@ -29,6 +29,8 @@ def main():
                     game.move()
                 else:
                     game.current_area = game.locate(x_mouse, y_mouse)
+                    if game.mid_bar_has_piece():
+                        game.current_area_has_to_be_mid_bar()
                     game.check_current_area_has_piece()
 
         game.update(WIN)
