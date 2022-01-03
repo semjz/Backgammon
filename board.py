@@ -3,6 +3,7 @@ import pygame.gfxdraw
 from pygame.locals import Rect
 from piece import Piece
 from number import Number
+from button import Button
 from constants import *
 
 
@@ -21,7 +22,9 @@ class Board:
         self.white_pieces_holder = Rect(0, 0, 0, 0)
         self.black_pieces_holder = Rect(0, 0, 0, 0)
         self.numbers = self.creat_numbers()
+        self.buttons = self.create_buttons()
         self.triangle_first_piece_centers = self.get_triangle_first_piece_centers()
+        self.dices = []
   
     """To adjust a number to be drawn in the middle of the square we calculate
        paddings that should be added to the cords of top left corner of 
@@ -35,6 +38,12 @@ class Board:
 
         return width_padding, height_padding
     
+    """shift an object in the board to the right. the minimum width of
+       the board is 750 so if width is greater than that every object 
+       in the board is shifted too the right"""
+    def shift_right(self, width):
+        return width + self.width_shift / 2
+
     """Accept the cords of top left square and add paddins to it and
        that should be the cords that the number is drawn at. The cords
        would be the top left of point of the number"""
@@ -43,12 +52,6 @@ class Board:
         new_x = self.shift_right(x + width_padding)
         new_y = y + height_padding
         return new_x, new_y
-
-    """shift an object in the board to the right. the minimum width of
-       the board is 750 so if width is greater than that every object 
-       in the board is shifted too the right"""
-    def shift_right(self, width):
-        return width + self.width_shift / 2
 
     def triangle_is_not_empty(self, tri_num):
         return self.pieces[tri_num - 1]
@@ -250,6 +253,15 @@ class Board:
         
         return pieces
 
+    def create_buttons(self):
+        self.buttons = {}
+        undo_btn = Button(self.shift_right(735), 280, 80, 40, WHITE, "undo")
+        self.buttons["undo"] = undo_btn
+        roll_dice_button = Button(self.shift_right(735), 340, 80, 40, WHITE, "draw_dices")
+        self.buttons["draw_dices"] = roll_dice_button
+        
+        return self.buttons
+
     def draw_board(self, surface):
         
         self.draw_background(surface)
@@ -257,6 +269,12 @@ class Board:
         
         for num in self.numbers:
             num.draw_number(surface)
+
+        for btn in self.buttons.values():
+            if btn.name == "undo":
+                btn.draw(surface, "undo")
+            else:
+                btn.draw(surface, "roll dices")
         
         self.draw_triangle(surface)
         
@@ -275,6 +293,10 @@ class Board:
 
         for i in range(len(self.black_pieces_holder_list)):
             pygame.draw.rect(surface, BLACK, (self.shift_right(750), 590 - i * 12, 50, 10))
+
+    def set_dices(self, dices):
+        for dice in dices:
+            self.dices.append(dice)
             
 
 

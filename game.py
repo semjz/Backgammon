@@ -1,5 +1,6 @@
 import pygame
 from board import Board
+from dice import Dice
 from constants import *
 
 class Game:
@@ -9,7 +10,35 @@ class Game:
         self.current_area = None
         self.dest_area = None
         self.area_selected = False
+        self.dices = self.create_dices()
+        self.dice_rolled = False
+        self.double_dice_rolled = False
+        self.valid_moves_on_board = []
+        self.total_no_of_moves = 0
+        self.total_move_distance_allowed_on_board = None
+        self.move_distance_left_on_board = None
         
+    def set_valid_moves(self):
+        if self.double_dice_rolled:
+            self.valid_moves_on_board = [i*self.dices[0].dice_num for i in range(1, 5)]
+        else:
+            self.valid_moves_on_board = [self.dices[0].dice_num, self.dices[1].dice_num, 
+                                        self.dices[0].dice_num + self.dices[1].dice_num]
+
+    def set_total_move_distance(self):
+        if self.double_dice_rolled:
+            self.total_move_distance_allowed_on_board = self.dices[0].dice_num * 4
+        else:
+            self.total_move_distance_allowed_on_board = self.dices[0].dice_num + self.dices[1].dice_num
+        self.move_distance_left_on_board = self.total_move_distance_allowed_on_board
+        # print(f"total move distance allowed: {self.total_move_distance_allowed_on_board}")
+
+    def set_total_no_of_moves(self):
+        if self.double_dice_rolled:
+            self.total_no_of_moves = 4
+        else:
+            self.total_no_of_moves = 2
+        # print(f"total no of moves: {self.total_no_of_moves}")
 
     # Locate which area of the board is selected
     def locate(self, x, y):
@@ -18,14 +47,16 @@ class Game:
             # highlight the piece if there is a piece on mid bar.
             if self.board.black_pieces_in_mid:
                 piece = self.board.black_pieces_in_mid[-1]
-                piece.highlight()
+                if self.dice_rolled:
+                    piece.highlight()
             return BLACK_MID_BAR
         # if the square for white pieces on mid bar is selected.
         elif self.board.shift_right(350) < x <self.board.shift_right(400) and y > 600:
             # highlight the piece if there is a piece on mid bar.
             if self.board.white_pieces_in_mid:
                 piece = self.board.white_pieces_in_mid[-1]
-                piece.highlight()
+                if self.dice_rolled:
+                    piece.highlight()
             return WHITE_MID_BAR
         # if white piece holder is clicked on by mouse.
         if self.board.white_pieces_holder.collidepoint(x, y):
@@ -36,7 +67,7 @@ class Game:
                 return WHITE_PLACE_HOLDER
             else:
                 return None
-        # if black piece holder is clicked on by mouse.
+        # if mouse is on black pieces holder
         elif self.board.black_pieces_holder.collidepoint(x, y):
             if self.area_selected:
                 return BLACK_PLACE_HOLDER
@@ -178,13 +209,16 @@ class Game:
                 return False
 
 
-    def move_on_board(self, current_tri_num, dest_tri_num):
+    def move_on_board(self, current_tri_num, dest_tri_num, highlight = False):
         current_tri_pieces_list = self.board.pieces[current_tri_num - 1]
         current_piece = current_tri_pieces_list.pop()
         dest_tri_pieces_list = self.board.pieces[dest_tri_num - 1]
 
         current_piece.dehighlight()
         
+        if highlight:
+            current_piece.highlight()
+
         # if the destination triangle only has 1 piece
         if len(dest_tri_pieces_list) == 1:
             dest_tri_first_piece = dest_tri_pieces_list[0]
@@ -192,43 +226,50 @@ class Game:
             # if current piece has a different color than destination
             # piece, move the destination piece to mid bar.
             if current_piece.color != dest_tri_first_piece.color:
+                print("remove")
                 self.move_piece_from_board_to_mid_bar(dest_tri_num)
         # if there are more than 5 pieces at current triangle expand
         # pieces on triangle after removing a piece.
         if len(self.board.pieces[current_tri_num - 1]) >= 5:
             self.expand_pieces_on_tri(current_tri_num)
         self.place_piece_at_destination(current_piece, dest_tri_num)
+        
+        self.total_no_of_moves -= 1
                 
     
     def legel_move_on_board(self, current_tri_num, dest_tri_num):
-        if current_tri_num is not None and dest_tri_num is not None:
-            current_tri_pieces_list = self.board.pieces[current_tri_num - 1]
-            current_piece = current_tri_pieces_list[-1]
+        if current_tri_num is None and dest_tri_num is None:
+            return False
+
+        current_tri_pieces_list = self.board.pieces[current_tri_num - 1]
+        current_piece = current_tri_pieces_list[-1]
+        
+        # when moving on bard destination can'be mid bar.
+        if dest_tri_num in (BLACK_MID_BAR, WHITE_MID_BAR):
+            return False
+        # if piece is moving in the right direction in the board.
+        if Game.correct_move_direction(current_piece, current_tri_num, dest_tri_num):
+            dest_tri_pieces_list = self.board.pieces[dest_tri_num - 1]
             
-            # when moving on bard destination can'be mid bar.
-            if dest_tri_num in (BLACK_MID_BAR, WHITE_MID_BAR):
-                return False
-            # if piece is moving in the right direction in the board.
-            if Game.correct_move_direction(current_piece, current_tri_num, dest_tri_num):
-                dest_tri_pieces_list = self.board.pieces[dest_tri_num - 1]
-                
-                # if there are 1 or 2 pieces on destination, move is 
-                # definitely valid.
-                if len(dest_tri_pieces_list) in (0,1):
+            # if there are 1 or 2 pieces on destination, move is 
+            # definitely valid.
+            if len(dest_tri_pieces_list) in (0,1):
+                return True
+            # if there are more than 1 pieces on destination, colors of
+            # current and destination pieces needs to be compared.
+            # if the color are different the move is illegall becuase
+            # a piece can't be place on a triangle with 1 or more pieces 
+            # of diffrent color.
+            elif len(dest_tri_pieces_list) > 1:
+                dest_tri_first_piece = dest_tri_pieces_list[0]
+                if current_piece.color == dest_tri_first_piece.color:
                     return True
-                # if there are more than 1 pieces on destination, colors of
-                # current and destination pieces needs to be compared.
-                # if the color are different the move is illegall becuase
-                # a piece can't be place on a triangle with 1 or more pieces 
-                # of diffrent color.
-                elif len(dest_tri_pieces_list) > 1:
-                    dest_tri_first_piece = dest_tri_pieces_list[0]
-                    if current_piece.color == dest_tri_first_piece.color:
-                        return True
-                    else:
-                        return False
-            else:
-                return False
+                else:
+                    return False
+        else:
+            False
+
+
 
     """ This method returns True if white piece is moving clock-wise
         and if black piece is moving anti-clock-wise """
@@ -338,10 +379,100 @@ class Game:
                 self.area_selected = False
         
         else:
-            if self.legel_move_on_board(self.current_area, self.dest_area):
-                self.move_on_board(self.current_area, self.dest_area)
-                self.area_selected = False
+            if self.double_dice_rolled:
+                self.moves_on_board_double_dice()
+            else:
+                move_distance = abs(self.dest_area - self.current_area)
+                if move_distance == self.total_move_distance_allowed_on_board:
+                    if not self.moves_on_board_single_dice([self.dices[0].dice_num, self.dices[1].dice_num]):
+                        self.moves_on_board_single_dice([self.dices[1].dice_num, self.dices[0].dice_num])
+                else:
+                    if self.legel_move_on_board(self.current_area, self.dest_area):
+                        if self.is_valid_move_on_board(self.current_area, self.dest_area):
+                            self.move_on_board(self.current_area, self.dest_area)
+                            self.area_selected = False
+
+
         
+    def moves_on_board_double_dice(self):
+        if self.is_valid_move_on_board(self.current_area, self.dest_area):
+            current_piece = self.board.pieces[self.current_area - 1][-1]
+            move_distance = abs(self.dest_area - self.current_area)
+            total_no_of_moves = self.total_no_of_moves
+            no_of_moves_made = int(move_distance / self.dices[0].dice_num)
+            current_area = self.current_area
+
+            for i in range(no_of_moves_made):
+                if current_piece.color == WHITE:
+                    dest_area = current_area + self.dices[0].dice_num
+                else:
+                    dest_area = current_area - self.dices[0].dice_num
+                
+                if self.legel_move_on_board(current_area, dest_area):
+                    if self.is_valid_move_on_board(current_area, dest_area):
+                        self.move_on_board(current_area, dest_area)
+                        self.total_no_of_moves -= 1
+                    else:
+                        if self.total_no_of_moves != total_no_of_moves:
+                            self.move_on_board(current_area, self.current_area, True)
+                            self.total_no_of_moves = total_no_of_moves
+                        return
+                else:
+                    if self.total_no_of_moves != total_no_of_moves:
+                        self.move_on_board(current_area, self.current_area, True)
+                        self.total_no_of_moves = total_no_of_moves
+                    return
+                
+                if current_piece.color == WHITE:
+                    current_area += self.dices[0].dice_num
+                else:
+                    current_area -= self.dices[0].dice_num
+            
+            self.area_selected = False
+            
+            
+
+    def moves_on_board_single_dice(self, moves_in_between):
+        current_piece = self.board.pieces[self.current_area - 1][-1]
+        total_no_of_moves = self.total_no_of_moves
+        current_area = self.current_area        
+        for move in moves_in_between:
+            if current_piece.color == WHITE: 
+                dest_area = current_area + move
+            else:
+                dest_area = current_area - move
+            print(f"current_area: {current_area}")
+            print(f"dest_area: {dest_area}")
+            print(f"legal: {self.legel_move_on_board(current_area, dest_area)}")
+            if self.legel_move_on_board(current_area, dest_area):
+                if self.is_valid_move_on_board(current_area, dest_area):
+                    self.move_on_board(current_area, dest_area)
+                    self.total_no_of_moves -= 1
+                else:
+                    if self.total_no_of_moves != total_no_of_moves:
+                        self.move_on_board(current_area, self.current_area, True)
+                        self.total_no_of_moves = total_no_of_moves
+                    return False
+            else:
+                if self.total_no_of_moves != total_no_of_moves:
+                    self.move_on_board(current_area, self.current_area, True)
+                    self.total_no_of_moves = total_no_of_moves
+                return False
+
+            current_area = dest_area
+
+        self.area_selected = False
+        return True
+
+
+    def is_valid_move_on_board(self, current_area, dest_area):
+        move_ditsnace = abs(dest_area - current_area)
+        if move_ditsnace in self.valid_moves_on_board:
+            self.valid_moves_on_board
+            return True
+        else:
+            return False
+
     
     # Find the triangle number that mouse cursor clicked on.
     def find_tri_number(self, x_mouse, y_mouse):
@@ -355,9 +486,8 @@ class Game:
                     piece = self.board.pieces[num.value - 1][-1]
                     # only highight the piece if mid bar is empty.
                     if not self.mid_bar_has_piece():
-                        piece.highlight()
-                # Since the mouse clicked on number an area is already selected.
-                self.area_selected = True
+                        if self.dice_rolled:
+                            piece.highlight()
                 return num.value
         return None
 
@@ -373,7 +503,66 @@ class Game:
     def current_area_has_to_be_mid_bar(self):
         if self.current_area not in (BLACK_MID_BAR, WHITE_MID_BAR):
             self.area_selected = False
+    
+    def undo(self):
+        if self.current_area == BLACK_MID_BAR:
+            current_tri_pieces_list = self.board.black_pieces_in_mid
+        elif self.current_area == WHITE_MID_BAR:
+            current_tri_pieces_list = self.board.white_pieces_in_mid
+        else:    
+            current_tri_pieces_list = self.board.pieces[self.current_area - 1]
+        current_piece = current_tri_pieces_list[-1]
+        current_piece.dehighlight()
+        self.area_selected = False
+
+    def create_dices(self):
+        dices = []
+        for i in range(2):
+            dices.append(Dice(40, 40, WHITE, 30 + i *50, 305))
+        return dices
+        
+
+    def draw_dices(self, surface):
+        for dice in self.dices:
+            dice.draw(surface)
+
+    def roll_dices(self):
+        self.double_dice_rolled = False
+        for dice in self.dices:
+            dice.roll()
+        if self.dices[0].dice_num == self.dices[1].dice_num:
+            self.double_dice_rolled = True
+        self.dice_rolled = True
+        self.set_valid_moves()
+        self.set_total_move_distance()
+        self.set_total_no_of_moves()
+    
+    def check_for_button_click(self, x_mouse, y_mouse):
+        for btn in self.board.buttons.values():
+            if btn.collide_with_mouse(x_mouse, y_mouse):
+                btn.clicked = True
+                
+
+    def this_buttuon_is_clicked(self, btn_name):
+        btn = self.board.buttons[btn_name]
+        if btn.clicked:
+            btn.set_color(TAN)
+        return btn.clicked
+
+
+    def reset_button_colors(self):
+        for btn in self.board.buttons.values():
+            btn.set_color(WHITE)
+
+    def unclick_all_buttons(self):
+        for btn in self.board.buttons.values():
+            btn.clicked = False
+
 
     def update(self, surface):
         self.board.draw_board(surface)
+        if self.total_no_of_moves != 0:
+            self.draw_dices(surface)
+        if self.total_no_of_moves == 0:
+            self.dice_rolled = False
         pygame.display.update()

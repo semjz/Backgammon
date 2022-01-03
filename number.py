@@ -17,9 +17,11 @@ class Number:
     # returns True if mouse is click on number area
     def collides_with_mouse(self, x_mouse, y_mouse):
         if self.width < 10:
-            return (self.x_cord - 6 < x_mouse < self.x_cord + self.width + 6) and (self.y_cord < y_mouse < self.y_cord + self.height)
+            return (self.x_cord - 6 < x_mouse < self.x_cord + self.width + 6) \
+                    and (self.y_cord < y_mouse < self.y_cord + self.height)
         else:
-            return (self.x_cord - 2 < x_mouse < self.x_cord + self.width + 2) and (self.y_cord < y_mouse < self.y_cord + self.height)
+            return (self.x_cord - 2 < x_mouse < self.x_cord + self.width + 2) \
+                     and (self.y_cord < y_mouse < self.y_cord + self.height)
 
     def set_cords(self, x, y):
         self.x_cord = x

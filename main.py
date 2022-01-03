@@ -18,23 +18,30 @@ def main():
         clock.tick(FPS)
 
         for event in pygame.event.get():
+            game.unclick_all_buttons()
             if event.type == pygame.QUIT:
                 running = False
                 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 x_mouse, y_mouse = pos[0], pos[1]
+                game.check_for_button_click(x_mouse, y_mouse)
                 # select a destination on board for move.
                 if game.area_selected:
+                    if game.this_buttuon_is_clicked("undo"):
+                        game.undo()
                     game.dest_area = game.locate(x_mouse, y_mouse)
                     # if destination selected is legal destination.
-                    if game.dest_area is not None:
+                    if game.dest_area is not None and game.dice_rolled:
                         game.move()
                 # select an origin on board for move.
                 else:
+                    # if game.total_no_of_moves == 0:
+                    if game.this_buttuon_is_clicked("draw_dices"): 
+                            game.roll_dices()
                     game.current_area = game.locate(x_mouse, y_mouse)
                     # if area selected is a valid origin.
-                    if game.current_area is not None:
+                    if game.current_area is not None and game.dice_rolled:
                         game.area_selected = True
                         # if mid bar has a piece, area selected must be mid bar
                         if game.mid_bar_has_piece():
@@ -44,6 +51,9 @@ def main():
                             game.current_area_has_to_be_mid_bar()
                         # check if current area selected if legal has a pieace
                         game.check_current_area_has_piece()
+            
+            if event.type == pygame.MOUSEBUTTONUP:
+                game.reset_button_colors()
 
         game.update(WIN)
      
